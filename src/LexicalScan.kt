@@ -18,7 +18,7 @@ private fun splitToTokens(inputLine: String): Array<String> {
 
 private fun tokenise(inputLine: String): Token {
     var token = "N"
-    var startPoint = 0
+    var startPoint = 1
     val firstChar = inputLine.substring(0, 1)
     val inputTokens = getTokens()
     for (element in inputTokens) {
@@ -40,7 +40,6 @@ private fun tokenise(inputLine: String): Token {
     }
 
     if (token == "N") {
-        startPoint = 1
         val regex = """[0-9]""".toRegex()
         if (regex.containsMatchIn(firstChar)) {
             token = "NUM $firstChar"

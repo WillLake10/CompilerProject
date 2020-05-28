@@ -1,4 +1,6 @@
-fun compile(inputCode: String): Array<String>{
+fun compile(inputCode: String): String{
     val tokens = lexScan(inputCode)
-    return tokens
+    println(tokens.contentToString())
+    val parse = parse(tokens)
+    return parse
 }
