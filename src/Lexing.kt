@@ -5,27 +5,23 @@ class Token(
 
 fun lexScan(inputSentance: String): Array<String> {
     val sentance: String = inputSentance.replace("\\s".toRegex(), "")
-    val sentanceArray: Array<String> = splitToTokens(sentance);
-    return sentanceArray
+    return splitToTokens(sentance)
 }
 
 fun splitToTokens(inputLine: String): Array<String> {
-    var token: Token = tokenise(inputLine)
-    var splitFull: Array<String>
-    if(inputLine.length != 1){
-        splitFull = arrayOf(token.token, *splitToTokens(inputLine.substring(token.startPoint,inputLine.length)))
+    val token: Token = tokenise(inputLine)
+    return if(inputLine.length != token.startPoint){
+        arrayOf(token.token, *splitToTokens(inputLine.substring(token.startPoint,inputLine.length)))
     }else{
-        splitFull = arrayOf(token.token)
+        arrayOf(token.token)
     }
-
-    return splitFull
 }
 
 fun tokenise(inputLine: String): Token {
     var token = "N"
     var startPoint: Int
-    var firstChar = inputLine.substring(0, 1)
-    var inputTokens = arrayOf("x", "+", "*", "-", "true", "false", "=", "<=", "¬", "^", ":=", "skip", ";", "if", "then", "else", "while", "do", "(", ")")
+    val firstChar = inputLine.substring(0, 1)
+    val inputTokens = arrayOf("x", "+", "*", "-", "true", "false", "=", "<=", "¬", "^", ":=", "skip", ";", "if", "then", "else", "while", "do", "(", ")")
     for (element in inputTokens) {
         if (element.length == 1) {
             if (firstChar == element) {
@@ -34,7 +30,7 @@ fun tokenise(inputLine: String): Token {
             }
         } else {
             if (firstChar == element.substring(0, 1)) {
-                if (inputLine.substring(0, element.length).equals(element)) {
+                if (inputLine.substring(0, element.length) == element) {
                     token = element
                     break
                 }
@@ -57,8 +53,6 @@ fun tokenise(inputLine: String): Token {
                 }
             }
         }
-
-
     }
     return Token(token, startPoint)
 }
