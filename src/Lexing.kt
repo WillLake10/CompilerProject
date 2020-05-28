@@ -1,14 +1,13 @@
-class Token(
+private class Token(
         var token: String,
         var startPoint: Int
 )
 
-fun lexScan(inputSentance: String): Array<String> {
-    val sentance: String = inputSentance.replace("\\s".toRegex(), "")
-    return splitToTokens(sentance)
+fun lexScan(inputSentence: String): Array<String> {
+    return splitToTokens(inputSentence.replace("\\s".toRegex(), ""))
 }
 
-fun splitToTokens(inputLine: String): Array<String> {
+private fun splitToTokens(inputLine: String): Array<String> {
     val token: Token = tokenise(inputLine)
     return if (inputLine.length != token.startPoint) {
         arrayOf(token.token, *splitToTokens(inputLine.substring(token.startPoint, inputLine.length)))
@@ -17,9 +16,9 @@ fun splitToTokens(inputLine: String): Array<String> {
     }
 }
 
-fun tokenise(inputLine: String): Token {
+private fun tokenise(inputLine: String): Token {
     var token = "N"
-    var startPoint: Int = 0
+    var startPoint = 0
     val firstChar = inputLine.substring(0, 1)
     val inputTokens = getTokens()
     for (element in inputTokens) {
