@@ -10,35 +10,36 @@ fun lexScan(inputSentance: String): Array<String> {
 
 fun splitToTokens(inputLine: String): Array<String> {
     val token: Token = tokenise(inputLine)
-    return if(inputLine.length != token.startPoint){
-        arrayOf(token.token, *splitToTokens(inputLine.substring(token.startPoint,inputLine.length)))
-    }else{
+    return if (inputLine.length != token.startPoint) {
+        arrayOf(token.token, *splitToTokens(inputLine.substring(token.startPoint, inputLine.length)))
+    } else {
         arrayOf(token.token)
     }
 }
 
 fun tokenise(inputLine: String): Token {
     var token = "N"
-    var startPoint: Int
+    var startPoint: Int = 0
     val firstChar = inputLine.substring(0, 1)
-    val inputTokens = arrayOf("x", "+", "*", "-", "true", "false", "=", "<=", "¬", "^", ":=", "skip", ";", "if", "then", "else", "while", "do", "(", ")")
+    val inputTokens = getTokens()
     for (element in inputTokens) {
-        if (element.length == 1) {
-            if (firstChar == element) {
-                token = element
+        if (element[0].length == 1) {
+            if (firstChar == element[0]) {
+                token = element[1]
+                startPoint = element[0].length
                 break
             }
         } else {
-            if (firstChar == element.substring(0, 1)) {
-                if (inputLine.substring(0, element.length) == element) {
-                    token = element
+            if (firstChar == element[0].substring(0, 1)) {
+                if (inputLine.substring(0, element[0].length) == element[0]) {
+                    token = element[1]
+                    startPoint = element[0].length
                     break
                 }
             }
         }
     }
 
-    startPoint = token.length
     if (token == "N") {
         startPoint = 1
         val regex = """[0-9]""".toRegex()
@@ -55,4 +56,28 @@ fun tokenise(inputLine: String): Token {
         }
     }
     return Token(token, startPoint)
+}
+
+private fun getTokens(): Array<Array<String>> {
+    return arrayOf(
+            arrayOf("x", "VAR X"),
+            arrayOf("+", "ADD"),
+            arrayOf("*", "TIMES"),
+            arrayOf("-", "SUBTRACT"),
+            arrayOf("true", "TRUE"),
+            arrayOf("false", "FALSE"),
+            arrayOf("=", "EQUAL"),
+            arrayOf("<=", "LTNEQ"),
+            arrayOf("¬", "NOT"),
+            arrayOf("^", "AND"),
+            arrayOf(":=", "ASSIGN"),
+            arrayOf("skip", "SKIP"),
+            arrayOf(";", ";"),
+            arrayOf("if", "IF"),
+            arrayOf("then", "THEN"),
+            arrayOf("else", "ELSE"),
+            arrayOf("while", "WHILE"),
+            arrayOf("do", "DO"),
+            arrayOf("(", "("),
+            arrayOf(")", ")"))
 }
