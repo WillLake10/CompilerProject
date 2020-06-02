@@ -1,11 +1,16 @@
 import dataObjects.TreeNode
 
+data class ParseDataSet(val treeSize: Int, var tokenArr: Array<Array<String>>) {
+    var nodes = Array(treeSize + 1) { TreeNode<String>("null") }
+    var nodeNum = 1
+    var tokenArray = tokenArr
+}
 
 fun parse(tokenArray: Array<String>): String {
-    val nodes = Array(tokenArray.size + 1) { TreeNode<String>("null") }
+    var nodes = Array(tokenArray.size + 1) { TreeNode<String>("null") }
     var nodeNum = 1
     nodes[0] = TreeNode<String>("root")
-    val topSplit = parseL1(tokenArray)
+    val topSplit = parseSemiColons(tokenArray)
     for (split in topSplit) {
         val nodeName = split.contentToString()
         nodes[nodeNum] = TreeNode<String>(nodeName.substring(1, nodeName.length - 1))
@@ -28,6 +33,7 @@ fun parse(tokenArray: Array<String>): String {
     return nodes[0].toString()
 }
 
+
 private fun containsTopLayerAssign(tokenArray: Array<String>): Boolean {
     var bracketLayer = 0
     for (token in tokenArray) {
@@ -40,7 +46,7 @@ private fun containsTopLayerAssign(tokenArray: Array<String>): Boolean {
     return false
 }
 
-private fun parseL1(tokenArray: Array<String>): Array<Array<String>> {
+private fun parseSemiColons(tokenArray: Array<String>): Array<Array<String>> {
     var returnArray: Array<Array<String>> = arrayOf(arrayOf())
     var firstTime = true
     var bracketLayer = 0
@@ -80,4 +86,3 @@ private fun parseL2(tokenArray: Array<String>): Array<TreeNode<String>> {
     }
     return returnNodes
 }
-
