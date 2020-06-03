@@ -24,7 +24,7 @@ class TreeNode<T>(value:T){
     }
 
     private fun ppTree(depth: Int, node: TreeNode<T>){
-        for (x in 0 until depth-1) print("| ")
+        for (x in 0 until depth-1) print("|  ")
         if(depth!=0) print("|--")
         print(node.value)
 

@@ -1,88 +1,122 @@
 import dataObjects.TreeNode
 
-data class ParseDataSet(val treeSize: Int, var tokenArr: Array<Array<String>>) {
-    var nodes = Array(treeSize + 1) { TreeNode<String>("null") }
+class ParseDataSet(treeSize: Int, var tokenArray: Array<String>) {
+    var nodes = Array(treeSize + 1) { TreeNode("null") }
     var nodeNum = 1
-    var tokenArray = tokenArr
+
 }
 
 fun parse(tokenArray: Array<String>): String {
-    var nodes = Array(tokenArray.size + 1) { TreeNode<String>("null") }
-    var nodeNum = 1
-    nodes[0] = TreeNode<String>("root")
-    val topSplit = parseSemiColons(tokenArray)
-    for (split in topSplit) {
-        val nodeName = split.contentToString()
-        nodes[nodeNum] = TreeNode<String>(nodeName.substring(1, nodeName.length - 1))
-        nodes[0].addChild(nodes[nodeNum])
-        val nodeLayer = nodeNum
-        nodeNum += 1
-
-        if (containsTopLayerAssign(split)) {
-            val childNodes = parseL2(split)
-            nodes[nodeLayer].value = childNodes[0].value
-            nodes[nodeNum].value = childNodes[1].value.substring(1, childNodes[1].value.length-1)
-            nodes[nodeNum+1].value = childNodes[2].value.substring(1, childNodes[2].value.length-1)
-            nodes[nodeLayer].addChild(nodes[nodeNum])
-            nodes[nodeLayer].addChild(nodes[nodeNum+1])
-            nodeNum += 2
-        }
-    }
-
-    nodes[0].prettyPrintTree()
-    return nodes[0].toString()
+    var parseDataSet = ParseDataSet(tokenArray.size, tokenArray)
+    parseDataSet.nodes[0] = TreeNode("root")
+    parseDataSet = parseS(parseDataSet, tokenArray)
+    parseDataSet.nodes[0].addChild(parseDataSet.nodes[1])
+    parseDataSet.nodes[0].prettyPrintTree()
+    return parseDataSet.nodes[0].toString()
 }
 
+private fun parseS(dataSet: ParseDataSet, tokenArr: Array<String>): ParseDataSet {
+    var pds = dataSet //pds = parseDataSet
+    val tArray = dataSet.tokenArray
+    pds.tokenArray = tokenArr
+    if (containsTopLayer(pds, ";")) {
+        pds = parseSemiColons(pds)
+    } else if (containsTopLayer(pds, "IF")) {
+        pds = parseIfTE(pds)
+    } else if (containsTopLayer(pds, "WHILE")) {
+        pds = parseIfTE(pds)
+    } else {
+        pds.nodes[pds.nodeNum] = TreeNode(tokenArr.contentToString())
+        pds.nodeNum++
+    }
+    pds.tokenArray = tArray
+    return pds
+}
 
-private fun containsTopLayerAssign(tokenArray: Array<String>): Boolean {
+private fun parseA(dataSet: ParseDataSet, tokenArr: Array<String>): ParseDataSet {
+    var pds = dataSet //pds = parseDataSet
+    pds.nodes[pds.nodeNum] = TreeNode(tokenArr.contentToString())
+    pds.nodeNum++
+    return pds
+}
+
+private fun parseB(dataSet: ParseDataSet, tokenArr: Array<String>): ParseDataSet {
+    var pds = dataSet //pds = parseDataSet
+    pds.nodes[pds.nodeNum] = TreeNode(tokenArr.contentToString())
+    pds.nodeNum++
+    return pds
+}
+
+private fun containsTopLayer(dataSet: ParseDataSet, tokenToCheck: String): Boolean {
+    var parseDataSet = dataSet
     var bracketLayer = 0
-    for (token in tokenArray) {
+    for (token in parseDataSet.tokenArray) {
         if (token.equals("(")) bracketLayer++
         if (token.equals(")")) bracketLayer--
-        if (token.equals("ASSIGN") && bracketLayer == 0) {
+        if (token.equals(tokenToCheck) && bracketLayer == 0) {
             return true
         }
     }
     return false
 }
 
-private fun parseSemiColons(tokenArray: Array<String>): Array<Array<String>> {
-    var returnArray: Array<Array<String>> = arrayOf(arrayOf())
-    var firstTime = true
+private fun parseSemiColons(dataSet: ParseDataSet): ParseDataSet {
+    var pds = dataSet //pds = parseDataSet
     var bracketLayer = 0
     var arrayPos = 0
-    var lastSplit = 0
-    for (token in tokenArray) {
+    for (token in pds.tokenArray) {
         if (token.equals("(")) bracketLayer++
         if (token.equals(")")) bracketLayer--
         if (token.equals(";") && bracketLayer == 0) {
-            if (firstTime) {
-                returnArray = arrayOf(tokenArray.sliceArray(lastSplit..arrayPos - 1))
-                firstTime = false
-            } else {
-                returnArray = arrayOf(*returnArray, tokenArray.sliceArray(lastSplit..arrayPos - 1))
-            }
-            lastSplit = arrayPos + 1
+            val parentNum = pds.nodeNum
+            pds.nodes[pds.nodeNum] = TreeNode(";")
+            pds.nodeNum++
+            var childNum = pds.nodeNum
+            pds = parseS(pds, pds.tokenArray.sliceArray(0..arrayPos - 1))
+            pds.nodes[parentNum].addChild(pds.nodes[childNum])
+            childNum = pds.nodeNum
+            pds = parseS(pds, pds.tokenArray.sliceArray(arrayPos + 1..pds.tokenArray.size - 1))
+            pds.nodes[parentNum].addChild(pds.nodes[childNum])
+            break
         }
         arrayPos++
     }
-    returnArray = arrayOf(*returnArray, tokenArray.sliceArray(lastSplit..arrayPos - 1))
-    return returnArray
+    return pds
 }
 
-private fun parseL2(tokenArray: Array<String>): Array<TreeNode<String>> {
-    val returnNodes = Array(tokenArray.size + 1) { TreeNode<String>("null") }
+private fun parseIfTE(dataSet: ParseDataSet): ParseDataSet {
+    var pds = dataSet //pds = parseDataSet
     var bracketLayer = 0
     var arrayPos = 0
-    for (token in tokenArray) {
+    var ifLoc = 0
+    var thenLoc = 0
+    var elseLoc = 0
+    for (token in pds.tokenArray) {
         if (token.equals("(")) bracketLayer++
         if (token.equals(")")) bracketLayer--
-        if (token.equals("ASSIGN") && bracketLayer == 0) {
-            returnNodes[0] = TreeNode<String>("ASSIGN")
-            returnNodes[1] = TreeNode<String>(tokenArray.sliceArray(0..arrayPos - 1).contentToString())
-            returnNodes[2] = TreeNode<String>(tokenArray.sliceArray(arrayPos + 1..tokenArray.size - 1).contentToString())
+        if (token.equals("IF") && bracketLayer == 0) {
+            ifLoc = arrayPos
+        }
+        if (token.equals("THEN") && bracketLayer == 0){
+            thenLoc = arrayPos
+        }
+        if (token.equals("ELSE") && bracketLayer == 0){
+            elseLoc = arrayPos
         }
         arrayPos++
     }
-    return returnNodes
+
+    val parentNum = pds.nodeNum
+    pds.nodes[pds.nodeNum] = TreeNode("IFTE") //If then else
+    pds.nodeNum++
+    var childNum = pds.nodeNum
+    pds = parseB(pds, pds.tokenArray.sliceArray(ifLoc+1..thenLoc-1))
+    pds.nodes[parentNum].addChild(pds.nodes[childNum])
+    childNum = pds.nodeNum
+    pds = parseS(pds, pds.tokenArray.sliceArray(thenLoc+1..elseLoc-1))
+    pds.nodes[parentNum].addChild(pds.nodes[childNum])
+    childNum = pds.nodeNum
+    pds = parseS(pds, pds.tokenArray.sliceArray(elseLoc-1..pds.tokenArray.size - 1))
+    pds.nodes[parentNum].addChild(pds.nodes[childNum])
+    return pds
 }
