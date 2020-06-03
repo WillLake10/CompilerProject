@@ -1,3 +1,4 @@
+import dataObjects.Tokens
 import dataObjects.TreeNode
 
 class ParseDataSet(treeSize: Int, var tokenArray: Array<String>) {
@@ -19,12 +20,12 @@ private fun parseS(dataSet: ParseDataSet, tokenArr: Array<String>): ParseDataSet
     var pds = dataSet //pds = parseDataSet
     val tArray = dataSet.tokenArray
     pds.tokenArray = tokenArr
-    if (containsTopLayer(pds, ";")) {
+    if (containsTopLayer(pds, Tokens()._semiColon())) {
         pds = parseSemiColons(pds)
-    } else if (containsTopLayer(pds, "IF")) {
+    } else if (containsTopLayer(pds, Tokens()._if())) {
         pds = parseIfTE(pds)
-    } else if (containsTopLayer(pds, "WHILE")) {
-        pds = parseIfTE(pds)
+    } else if (containsTopLayer(pds, Tokens()._while())) {
+        //pds = parseIfTE(pds)
     } else {
         pds.nodes[pds.nodeNum] = TreeNode(tokenArr.contentToString())
         pds.nodeNum++
@@ -65,11 +66,11 @@ private fun parseSemiColons(dataSet: ParseDataSet): ParseDataSet {
     var bracketLayer = 0
     var arrayPos = 0
     for (token in pds.tokenArray) {
-        if (token.equals("(")) bracketLayer++
-        if (token.equals(")")) bracketLayer--
-        if (token.equals(";") && bracketLayer == 0) {
+        if (token.equals(Tokens()._brkOpen())) bracketLayer++
+        if (token.equals(Tokens()._brkClose())) bracketLayer--
+        if (token.equals(Tokens()._semiColon()) && bracketLayer == 0) {
             val parentNum = pds.nodeNum
-            pds.nodes[pds.nodeNum] = TreeNode(";")
+            pds.nodes[pds.nodeNum] = TreeNode(Tokens()._semiColon())
             pds.nodeNum++
             var childNum = pds.nodeNum
             pds = parseS(pds, pds.tokenArray.sliceArray(0..arrayPos - 1))
@@ -92,15 +93,15 @@ private fun parseIfTE(dataSet: ParseDataSet): ParseDataSet {
     var thenLoc = 0
     var elseLoc = 0
     for (token in pds.tokenArray) {
-        if (token.equals("(")) bracketLayer++
-        if (token.equals(")")) bracketLayer--
-        if (token.equals("IF") && bracketLayer == 0) {
+        if (token.equals(Tokens()._brkOpen())) bracketLayer++
+        if (token.equals(Tokens()._brkClose())) bracketLayer--
+        if (token.equals(Tokens()._if()) && bracketLayer == 0) {
             ifLoc = arrayPos
         }
-        if (token.equals("THEN") && bracketLayer == 0){
+        if (token.equals(Tokens()._then()) && bracketLayer == 0){
             thenLoc = arrayPos
         }
-        if (token.equals("ELSE") && bracketLayer == 0){
+        if (token.equals(Tokens()._else()) && bracketLayer == 0){
             elseLoc = arrayPos
         }
         arrayPos++

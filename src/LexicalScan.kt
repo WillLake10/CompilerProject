@@ -1,3 +1,5 @@
+import dataObjects.getTokens
+
 private class Token(
         var token: String,
         var startPoint: Int
@@ -56,26 +58,3 @@ private fun tokenise(inputLine: String): Token {
     return Token(token, startPoint)
 }
 
-private fun getTokens(): Array<Array<String>> {
-    return arrayOf(
-            arrayOf("x", "VAR X"),
-            arrayOf("+", "ADD"),
-            arrayOf("*", "TIMES"),
-            arrayOf("-", "SUBTRACT"),
-            arrayOf("true", "TRUE"),
-            arrayOf("false", "FALSE"),
-            arrayOf("=", "EQUAL"),
-            arrayOf("<=", "LTNEQ"),
-            arrayOf("¬", "NOT"),
-            arrayOf("^", "AND"),
-            arrayOf(":=", "ASSIGN"),
-            arrayOf("skip", "SKIP"),
-            arrayOf(";", ";"),
-            arrayOf("if", "IF"),
-            arrayOf("then", "THEN"),
-            arrayOf("else", "ELSE"),
-            arrayOf("while", "WHILE"),
-            arrayOf("do", "DO"),
-            arrayOf("(", "("),
-            arrayOf(")", ")"))
-}
